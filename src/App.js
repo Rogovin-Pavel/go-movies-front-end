@@ -1,7 +1,18 @@
-import React from "react";
-import { Outlet } from "react-router-dom";
+import React, { useState } from "react";
+import { Link, Outlet, useNavigate } from "react-router-dom";
+import { Alert } from "./components/Alert";
 
 export const App = () => {
+  const [jwtToken, setJwtToken] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertClassName, setAlertClassName] = useState("d-none");
+  const navigate = useNavigate();
+
+  const logout = () => {
+    setJwtToken("");
+    navigate("/login");
+  };
+
   return (
     <div className="container">
       <div className="row">
@@ -9,9 +20,15 @@ export const App = () => {
           <h1 className="mt-3">Go watch a movie</h1>
         </div>
         <div className="col text-end">
-          <a href="#!">
-            <span className="badge bg-success">Login</span>
-          </a>
+          {jwtToken === "" ? (
+            <Link to="/login">
+              <span className="badge bg-success">Login</span>
+            </Link>
+          ) : (
+            <button className="badge bg-danger" onClick={logout}>
+              Logout
+            </button>
+          )}
         </div>
         <hr className="mb-3" />
       </div>
@@ -19,32 +36,56 @@ export const App = () => {
         <div className="col-md-2">
           <nav>
             <div className="list-group">
-              <a href="/" className="list-group-item list-group-item-action">
+              <Link to="/" className="list-group-item list-group-item-action">
                 Home
-              </a>
-              <a
-                href="/movies"
+              </Link>
+              <Link
+                to="/movies"
                 className="list-group-item list-group-item-action"
               >
                 Movies
-              </a>
-              <a href="#!" className="list-group-item list-group-item-action">
+              </Link>
+              <Link
+                to="/genres"
+                className="list-group-item list-group-item-action"
+              >
                 Genres
-              </a>
-              <a href="#!" className="list-group-item list-group-item-action">
-                Add Movie
-              </a>
-              <a href="#!" className="list-group-item list-group-item-action">
-                Manage Catalogue
-              </a>
-              <a href="#!" className="list-group-item list-group-item-action">
-                GraphQL
-              </a>
+              </Link>
+              {jwtToken && (
+                <>
+                  <Link
+                    to="/admin/movie/0"
+                    className="list-group-item list-group-item-action"
+                  >
+                    Add Movie
+                  </Link>
+                  <Link
+                    to="/manage-catalogue"
+                    className="list-group-item list-group-item-action"
+                  >
+                    Manage Catalogue
+                  </Link>
+                  <Link
+                    to="/graphql"
+                    className="list-group-item list-group-item-action"
+                  >
+                    GraphQL
+                  </Link>
+                </>
+              )}
             </div>
           </nav>
         </div>
         <div className="col-md-10">
-          <Outlet />
+          <Alert message={alertMessage} className={alertClassName} />
+          <Outlet
+            context={{
+              jwtToken,
+              setJwtToken,
+              setAlertMessage,
+              setAlertClassName,
+            }}
+          />
         </div>
       </div>
     </div>
